@@ -1,0 +1,50 @@
+@font-face {
+    font-family: Pacifico;
+    src: url("../assets/fonts/Pacifico-Regular.ttf");
+}
+
+@font-face {
+    font-family: Inter;
+    src: url("../assets/fonts/Inter_24pt-Regular.ttf");
+}
+
+@font-face {
+    font-family: PlayfairDisplay;
+    src: url("../assets/fonts/PlayfairDisplay-Regular.ttf");
+}
+
+@import "tailwindcss";
+
+@theme {
+    --font-texto: Inter,'sans-serif';
+    --font-titulo: Pacifico,'cursive';
+    --font-subtitulo: PlayfairDisplay,'serif';
+
+    --color-cafe-claro: #fff5e1;
+    --color-cafe-blanco: #FFF9ED;
+    --color-cafe-negro: #1d1300;
+    --color-rosa: #ffc0cb;
+    --color-cafe-oscuro: #5d4037;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
