@@ -1,11 +1,11 @@
-package com.milsabores.controller;
+package com.milsabores.backend.controller;
 
-import com.milsabores.dto.AuthResponse;
-import com.milsabores.dto.LoginRequest;
-import com.milsabores.dto.RegisterRequest;
-import com.milsabores.model.Usuario;
-import com.milsabores.repository.UsuarioRepository;
-import com.milsabores.security.JwtUtil;
+import com.milsabores.backend.dto.AuthResponse;
+import com.milsabores.backend.dto.LoginRequest;
+import com.milsabores.backend.dto.RegisterRequest;
+import com.milsabores.backend.model.Usuario;
+import com.milsabores.backend.repository.UsuarioRepository;
+import com.milsabores.backend.security.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -115,20 +114,6 @@ public class AuthController {
         return ResponseEntity.ok("Logout exitoso");
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body("No autenticado");
-        }
-
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        usuario.setPassword(null);
-        return ResponseEntity.ok(usuario);
-    }
-
    
     @GetMapping("/me") 
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
@@ -171,4 +156,3 @@ public class AuthController {
         }
     }
 }
-
