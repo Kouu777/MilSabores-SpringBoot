@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext"; 
 import hero from "../assets/images/hero-image.jpg";
 
 export default function Register() {
@@ -13,6 +14,17 @@ export default function Register() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
   const [mostrarBeneficioDuoc, setMostrarBeneficioDuoc] = useState(false);
+
+  // usar el contexto de autenticación
+  const { register, isAuthenticated, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  // redirigir si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     const norm = (email || "").trim().toLowerCase();
@@ -32,7 +44,17 @@ export default function Register() {
     return "";
   };
 
-  const navigate = useNavigate();
+  const calcularEdad = (fechaStr) => {
+    if (!fechaStr) return null;
+    const nacimiento = new Date(fechaStr);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -44,53 +66,37 @@ export default function Register() {
     }
     setCargando(true);
 
-    setTimeout(() => {
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const normalizedEmail = (email || "").trim().toLowerCase();
-  const userExists = users.find((user) => (user.email || "").trim().toLowerCase() === normalizedEmail);
-
-      if (userExists) {
-        setError("Este correo electrónico ya está registrado.");
-        setCargando(false);
-        return;
-      }
-
-     
-
-      const calcularEdad = (fechaStr) => {
-        if (!fechaStr) return null;
-        const nacimiento = new Date(fechaStr);
-        const hoy = new Date();
-        let edad = hoy.getFullYear() - nacimiento.getFullYear();
-        const m = hoy.getMonth() - nacimiento.getMonth();
-        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-          edad--;
-        }
-        return edad;
-      };
-
+    try {
+      // preparar datos para el backend manteniendo tus funciones
+      const normalizedEmail = (email || "").trim().toLowerCase();
       const edad = calcularEdad(fechaNacimiento);
       const isDuoc = /@duocuc\.cl$/i.test(normalizedEmail);
       const hasFelices50 = (cupon || "").trim().toUpperCase() === "FELICES50";
 
-      const newUser = {
-        name,
+      // crear objeto de usuario para el backend
+      const userData = {
+        nombre: name, 
+        apellido: "", 
         email: normalizedEmail,
-        fechaNacimiento,
-        password,
-        edad,
-        isDuoc,
-        hasFelices50,
+        password: password,
+        fechaNacimiento: fechaNacimiento,
+        edad: edad,
+        isDuoc: isDuoc,
+        hasFelices50: hasFelices50,
         preferencias: preferencias || "",
+        cupon: cupon || ""
       };
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
-      // también loguear al usuario creado para aplicar beneficios inmediatamente
-      localStorage.setItem("loggedInUser", JSON.stringify(newUser));
 
+      // usar el servicio de registro JWT
+      await register(userData);
+      // La redirección se maneja automáticamente en el useEffect
+      
+    } catch (error) {
+      //  manejar errores del backend
+      setError(error.message || "Error al crear la cuenta");
+    } finally {
       setCargando(false);
-      navigate("/");
-    }, 1000);
+    }
   };
 
   return (
@@ -130,6 +136,7 @@ export default function Register() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
 
@@ -145,6 +152,7 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
             <p
               id="duoc-benefit-message"
@@ -167,6 +175,7 @@ export default function Register() {
               value={fechaNacimiento}
               onChange={(e) => setFechaNacimiento(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
 
@@ -185,6 +194,7 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
 
@@ -203,6 +213,7 @@ export default function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
 
@@ -217,15 +228,16 @@ export default function Register() {
               name="coupon"
               value={cupon}
               onChange={(e) => setCupon(e.target.value)}
+              disabled={cargando || authLoading} 
             />
           </div>
 
           <button
             type="submit"
-            className="w-full  text-cafe-oscuro rounded-2xl px-4 py-2 border-1 border-cafe-oscuro hover:bg-cafe-oscuro hover:cursor-pointer hover:text-cafe-claro transition-all duration-200"
-            disabled={cargando}
+            className="w-full text-cafe-oscuro rounded-2xl px-4 py-2 border-1 border-cafe-oscuro hover:bg-cafe-oscuro hover:cursor-pointer hover:text-cafe-claro transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" // ← MEJORADO
+            disabled={cargando || authLoading} 
           >
-            {cargando ? "Creando Cuenta..." : "Crear Cuenta"}
+            {cargando || authLoading ? "Creando Cuenta..." : "Crear Cuenta"} {}
           </button>
         </form>
 

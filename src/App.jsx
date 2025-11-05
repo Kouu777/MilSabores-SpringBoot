@@ -11,9 +11,11 @@ import Blog from "./pages/Blog";
 import Checkout from "./pages/Checkout";
 import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext"
 
 export default function App() {
   return (
+    <AuthProvider>
     <CartProvider>
       <Navbar />
       <Routes>
@@ -30,5 +32,6 @@ export default function App() {
       </Routes>
       <Footer />
     </CartProvider>
+    </AuthProvider>
   );
 }

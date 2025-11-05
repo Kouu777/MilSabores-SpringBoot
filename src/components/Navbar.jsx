@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext"; 
 
 const ProfileIcon = ({ name }) => (
   <div className="w-10 h-10 rounded-full bg-cafe-oscuro text-cafe-claro flex items-center justify-center font-bold text-lg">
@@ -33,7 +34,6 @@ const CartIcon = ({ count }) => (
 );
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false);
   const cartDropdownRef = useRef(null);
@@ -51,6 +51,9 @@ export default function Navbar() {
     totalPrice,
   } = useCart();
 
+ 
+  const { user: authUser, logout, isAuthenticated } = useAuth();
+
   const [processingPurchase, setProcessingPurchase] = useState(false);
   const [processedReceipt, setProcessedReceipt] = useState(null);
   const [processingShipment, setProcessingShipment] = useState(false);
@@ -62,9 +65,8 @@ export default function Navbar() {
   const [mapGenerating, setMapGenerating] = useState(false);
   const [thankYouVisible, setThankYouVisible] = useState(false);
 
+ 
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-    setUser(loggedInUser);
     setDropdownOpen(false);
   }, [location]);
 
@@ -158,10 +160,15 @@ export default function Navbar() {
     };
   }, [showMap, shipmentCoords]);
 
+ 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
-    setUser(null);
+    logout();
     navigate("/");
+  };
+
+  
+  const getUserDisplayName = () => {
+    return authUser?.nombre || authUser?.name || "Usuario";
   };
 
   const renderProcessedReceipt = () => {
@@ -392,22 +399,24 @@ export default function Navbar() {
 
 
         <div className="flex justify-end relative">
-          {user ? (
+          {}
+          {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <span className="font-texto text-cafe-oscuro">
-                Hola, {user.name}
+                Hola, {getUserDisplayName()}
               </span>
               <button
                 className="hover:cursor-pointer flex items-center"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                <ProfileIcon name={user.name} />
+                <ProfileIcon name={getUserDisplayName()} />
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 top-full w-48 bg-cafe-claro rounded-2xl shadow-lg border-1 border-cafe-oscuro py-2">
                   <NavLink
                     to="/profile"
                     className="block px-4 py-2 text-cafe-oscuro hover:bg-cafe-oscuro/10"
+                    onClick={() => setDropdownOpen(false)}
                   >
                     Modificar Cuenta
                   </NavLink>
@@ -460,7 +469,8 @@ export default function Navbar() {
               ref={cartDropdownRef}
               className="absolute right-0 mt-2 top-full w-80 md:w-96 bg-cafe-claro rounded-2xl shadow-lg border-1 border-cafe-oscuro py-2 z-30"
             >
-              {!user ? (
+              {}
+              {!isAuthenticated ? (
                 <div className="p-6 text-center">
                   <p className="font-texto text-cafe-oscuro">
                     Por favor, inicia sesión para ver y gestionar tu carrito de

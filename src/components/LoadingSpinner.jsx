@@ -1,0 +1,11 @@
+import React from 'react';
+import './LoadingSpinner.css';
+
+const LoadingSpinner = ({ message = "Cargando..." }) => {
+  return (
+    <div className="loading-spinner-container">
+      <div className="loading-spinner"></div>
+      <p className="loading-message">{message}</p>
+    </div>
+  );
+};

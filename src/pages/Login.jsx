@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import hero from "../assets/images/hero-image.jpg";
+import { useAuth } from "../context/AuthContext"; 
 
 export default function Login() {
   const navigate = useNavigate();
@@ -8,6 +9,15 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
+
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
+
+  //redirigir si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const validar = () => {
     if (!email) return "El email es obligatorio";
@@ -28,21 +38,19 @@ export default function Login() {
       return;
     }
     setCargando(true);
-    setTimeout(() => {
-      const users = JSON.parse(localStorage.getItem("users")) || [];
-      const user = users.find(
-        (user) => user.email === email && user.password === password
-      );
 
-      if (user) {
-        localStorage.setItem("loggedInUser", JSON.stringify(user));
-        navigate("/");
-      } else {
-        setError("Correo electrónico o contraseña incorrectos.");
-      }
+    try {
+      // usar el servicio de autenticación JWT
+      await login(email, password);
+      // La redirección se maneja automáticamente en el useEffect
+    } catch (error) {
+      // manejar errores del backend
+      setError(error.message || "Error al iniciar sesión");
+    } finally {
       setCargando(false);
-    }, 1000);
+    }
   };
+
 
   return (
     <section
@@ -77,6 +85,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
           <div>
@@ -95,14 +104,15 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={cargando || authLoading} 
             />
           </div>
           <button
-            className="w-full  text-cafe-oscuro rounded-2xl px-4 py-2 border-1 border-cafe-oscuro hover:bg-cafe-oscuro hover:cursor-pointer hover:text-cafe-claro transition-all duration-200"
+            className="w-full text-cafe-oscuro rounded-2xl px-4 py-2 border-1 border-cafe-oscuro hover:bg-cafe-oscuro hover:cursor-pointer hover:text-cafe-claro transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" // ← MEJORADO
             type="submit"
-            disabled={cargando}
+            disabled={cargando || authLoading} 
           >
-            {cargando ? "Ingresando..." : "Iniciar Sesión"}
+            {cargando || authLoading ? "Ingresando..." : "Iniciar Sesión"} {}
           </button>
         </form>
 
