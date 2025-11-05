@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -127,4 +128,47 @@ public class AuthController {
         usuario.setPassword(null);
         return ResponseEntity.ok(usuario);
     }
+
+   
+    @GetMapping("/me") 
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(401).body("No autenticado");
+            }
+
+            String email = authentication.getName();
+            Usuario usuario = usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            // Calcular edad si no está calculada
+            if (usuario.getFechaNacimiento() != null && usuario.getEdad() == null) {
+                usuario.setEdad(calcularEdad(usuario.getFechaNacimiento()));
+                usuarioRepository.save(usuario);
+            }
+            
+            // Calcular si es Duoc si no está establecido
+            if (usuario.getIsDuoc() == null && usuario.getEmail() != null) {
+                usuario.setIsDuoc(usuario.getEmail().toLowerCase().endsWith("@duocuc.cl"));
+                usuarioRepository.save(usuario);
+            }
+
+            usuario.setPassword(null);
+            return ResponseEntity.ok(usuario);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error obteniendo usuario: " + e.getMessage());
+        }
+    }
+
+    private Integer calcularEdad(String fechaNacimiento) {
+        try {
+            java.time.LocalDate nacimiento = java.time.LocalDate.parse(fechaNacimiento);
+            java.time.LocalDate hoy = java.time.LocalDate.now();
+            return java.time.Period.between(nacimiento, hoy).getYears();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
+

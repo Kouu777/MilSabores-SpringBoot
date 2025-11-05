@@ -33,6 +33,24 @@ public class Usuario {
     
     @Column(name = "es_activo")
     private Boolean esActivo = true;
+
+    @Column(name = "fecha_nacimiento")
+    private String fechaNacimiento;
+    
+    @Column(name = "edad")
+    private Integer edad;
+    
+    @Column(name = "es_duoc")
+    private Boolean isDuoc = false;
+    
+    @Column(name = "tiene_felices50")
+    private Boolean hasFelices50 = false;
+    
+    @Column(name = "preferencias", length = 500)
+    private String preferencias;
+    
+    @Column(name = "cupon", length = 50)
+    private String cupon;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", length = 20)
