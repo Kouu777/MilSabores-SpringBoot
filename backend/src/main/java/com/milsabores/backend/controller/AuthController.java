@@ -1,8 +1,8 @@
 package com.milsabores.backend.controller;
 
-import com.milsabores.backend.dto.AuthResponse;
-import com.milsabores.backend.dto.LoginRequest;
-import com.milsabores.backend.dto.RegisterRequest;
+import com.milsabores.backend.dtos.AuthResponse;
+import com.milsabores.backend.dtos.LoginRequest;
+import com.milsabores.backend.dtos.RegisterRequest;
 import com.milsabores.backend.model.Usuario;
 import com.milsabores.backend.repository.UsuarioRepository;
 import com.milsabores.backend.security.JwtUtil;
@@ -76,10 +76,6 @@ public class AuthController {
             usuario.setApellido(registerRequest.getApellido());
             usuario.setEmail(registerRequest.getEmail());
             usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-            usuario.setTelefono(registerRequest.getTelefono());
-            usuario.setDireccion(registerRequest.getDireccion());
-            usuario.setCiudad(registerRequest.getCiudad());
-            usuario.setCodigoPostal(registerRequest.getCodigoPostal());
             usuario.setEsActivo(true);
 
             Usuario savedUsuario = usuarioRepository.save(usuario);

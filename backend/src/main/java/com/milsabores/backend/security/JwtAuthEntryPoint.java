@@ -1,4 +1,4 @@
-package main.java.com.milsabores.backend.security;
+package com.milsabores.backend.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

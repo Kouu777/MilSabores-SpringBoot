@@ -1,4 +1,4 @@
-package main.java.com.milsabores.backend.security;
+package com.milsabores.backend.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

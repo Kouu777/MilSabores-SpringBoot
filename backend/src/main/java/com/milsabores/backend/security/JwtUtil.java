@@ -1,6 +1,7 @@
 package com.milsabores.backend.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -8,9 +9,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -52,5 +50,14 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
         return claimsResolver.apply(claims);
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'generateToken'");
+    }
+
+    public boolean validateToken(String jwt, UserDetails userDetails) {
+        throw new UnsupportedOperationException("Unimplemented method 'validateToken'");
     }
 }

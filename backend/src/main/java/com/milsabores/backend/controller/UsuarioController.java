@@ -1,8 +1,10 @@
-package com.imlisabores.backend.controller;
+package com.milsabores.backend.controller;
 
-import com.imlisabores.backend.dto.UserUpdateRequest;
-import com.imlisabores.backend.model.Usuario;
-import com.imlisabores.backend.repository.UsuarioRepository;
+import com.milsabores.backend.model.Usuario;
+
+
+import com.milsabores.backend.dtos.UserUpdateRequest;
+import com.milsabores.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

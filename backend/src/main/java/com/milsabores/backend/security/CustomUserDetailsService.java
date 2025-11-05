@@ -1,7 +1,7 @@
-package main.java.com.milsabores.backend.security;
+package com.milsabores.backend.security;
 
-import com.milsabores.model.Usuario;
-import com.milsabores.repository.UsuarioRepository;
+import com.milsabores.backend.model.Usuario;
+import com.milsabores.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
