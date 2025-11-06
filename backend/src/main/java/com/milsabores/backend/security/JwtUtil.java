@@ -1,63 +1,77 @@
 package com.milsabores.backend.security;
 
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 @Component
 public class JwtUtil {
 
-    private static final Logger LOGGER = Logger.getLogger(JwtUtil.class.getName());
-
-    @Value("${jwt.secret:miClaveSecretaMuySeguraParaJWTDeMilSabores2024QueEsMuyLargaParaQueFuncioneCorrectamente}")
+    @Value("${jwt.secret:miClaveSecretaMuySeguraParaJWTDeMilSabores2024QueEsMuyLargaParaSpringBoot3}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}") // 24 horas por defecto
     private Long expiration;
 
     private SecretKey getSigningKey() {
-        // Validar longitud de la clave secreta
+        // Si la clave es muy corta, generar una automáticamente
         if (secret.length() < 32) {
-            LOGGER.warning("La clave secreta es demasiado corta. Se generará una clave segura automáticamente.");
             return Keys.secretKeyFor(SignatureAlgorithm.HS256);
         }
-        // Convertir la clave secreta a bytes usando UTF-8
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String extractUsername(String token) {
-        try {
-            return extractClaim(token, claims -> claims.getSubject());
-        } catch (Exception e) {
-            LOGGER.severe("Error al extraer el nombre de usuario del token: " + e.getMessage());
-            return null;
-        }
+        return extractClaim(token, Claims::getSubject);
     }
 
-    // Método auxiliar para extraer un claim específico
-    public <T> T extractClaim(String token, Function<io.jsonwebtoken.Claims, T> claimsResolver) {
-        final io.jsonwebtoken.Claims claims = Jwts.parserBuilder()
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claimsResolver.apply(claims);
     }
 
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // ← ESTE ES EL MÉTODO QUE FALTA
     public String generateToken(UserDetails userDetails) {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'generateToken'");
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, userDetails.getUsername());
     }
 
-    public boolean validateToken(String jwt, UserDetails userDetails) {
-        throw new UnsupportedOperationException("Unimplemented method 'validateToken'");
+    private String createToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

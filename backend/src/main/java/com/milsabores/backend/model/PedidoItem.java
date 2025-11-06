@@ -22,10 +22,10 @@ public class PedidoItem {
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
     
-    @Column(name = "precio_unitario", precision = 10, scale = 2)
+    @Column(name = "precio_unitario", nullable = false)
     private Double precioUnitario;
     
-    @Column(name = "subtotal", precision = 10, scale = 2)
+    @Column(name = "subtotal", nullable = false)
     private Double subtotal;
     
     @PrePersist

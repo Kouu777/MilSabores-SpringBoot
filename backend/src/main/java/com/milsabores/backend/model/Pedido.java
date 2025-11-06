@@ -34,13 +34,13 @@ public class Pedido {
     @Column(name = "estado", length = 20)
     private EstadoPedido estado = EstadoPedido.PENDIENTE;
     
-    @Column(name = "subtotal", precision = 10, scale = 2)
+    @Column(name = "subtotal", nullable = false)
     private Double subtotal;
     
-    @Column(name = "costo_envio", precision = 10, scale = 2)
+    @Column(name = "costo_envio", nullable = false)
     private Double costoEnvio;
     
-    @Column(name = "total", precision = 10, scale = 2)
+    @Column(name = "total", nullable = false)
     private Double total;
     
     @Column(name = "direccion_entrega")

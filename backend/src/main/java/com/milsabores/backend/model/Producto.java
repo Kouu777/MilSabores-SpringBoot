@@ -3,6 +3,8 @@ package com.milsabores.backend.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "productos")
@@ -19,6 +21,7 @@ public class Producto {
     @Column(name = "descripcion")
     private String descripcion;
     
+    // ⚠️ SOLO esto - SIN precision y scale
     @Column(name = "precio", nullable = false)
     private Double precio;
     
@@ -37,9 +40,16 @@ public class Producto {
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
     
+    @ManyToMany
+    @JoinTable(
+        name = "producto_ingrediente",
+        joinColumns = @JoinColumn(name = "producto_id"),
+        inverseJoinColumns = @JoinColumn(name = "ingrediente_id")
+    )
+    private List<Ingrediente> ingredientes = new ArrayList<>();
+    
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();
     }
 }
-

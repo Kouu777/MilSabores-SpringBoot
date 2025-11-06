@@ -20,7 +20,7 @@ public class Ingrediente {
     private String descripcion;
     
     @Column(name = "categoria")
-    private String categoria; // "vegetal", "fruta", "carne", "lacteo", "cereal"
+    private String categoria; 
     
     @Column(name = "es_alergenico")
     private Boolean esAlergenico = false;
