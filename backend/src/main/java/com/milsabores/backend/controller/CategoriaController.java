@@ -21,7 +21,15 @@ public class CategoriaController {
     // GET: Todas las categorías activas
     @GetMapping
     public List<Categoria> getAllCategorias() {
-        return categoriaRepository.findByEsActivaTrueOrderByOrdenAsc();
+        // Primero intenta obtener categorías activas ordenadas
+        List<Categoria> categorias = categoriaRepository.findByEsActivaTrueOrderByOrdenAsc();
+        
+        // Si no hay categorías activas, devuelve todas
+        if (categorias.isEmpty()) {
+            categorias = categoriaRepository.findAll();
+        }
+        
+        return categorias;
     }
 
     // GET: Categoría por ID
