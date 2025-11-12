@@ -9,7 +9,7 @@ import com.milsabores.backend.dtos.UserUpdateRequest;
 import com.milsabores.backend.dtos.PerfilDTO;
 import com.milsabores.backend.dtos.ChangePasswordRequest;
 import com.milsabores.backend.repository.UsuarioRepository;
-// JwtUtil removed: not needed here
+import com.milsabores.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,6 +30,8 @@ public class UsuarioController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // ============ ENDPOINTS EXISTENTES ============
 
@@ -99,17 +101,14 @@ public class UsuarioController {
 
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
-            PerfilDTO perfilDTO = new PerfilDTO();
-            perfilDTO.setId(usuario.getId());
-            perfilDTO.setNombre(usuario.getNombre() != null ? usuario.getNombre() : "");
-            perfilDTO.setApellido(usuario.getApellido());
-            perfilDTO.setEmail(usuario.getEmail());
-            perfilDTO.setFechaNacimiento(usuario.getFechaNacimiento());
-            perfilDTO.setEdad(usuario.getEdad());
-            perfilDTO.setIsDuoc(usuario.getIsDuoc());
-            perfilDTO.setHasFelices50(usuario.getHasFelices50());
-            perfilDTO.setPreferencias(usuario.getPreferencias());
-            perfilDTO.setFechaRegistro(usuario.getFechaRegistro());
+            PerfilDTO perfilDTO = new PerfilDTO(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getTelefono(),
+                usuario.getDireccion(),
+                usuario.getFechaCreacion()
+            );
             return ResponseEntity.ok(perfilDTO);
         }
 
@@ -135,42 +134,28 @@ public class UsuarioController {
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
 
-            // Actualizar solo los campos que vienen en el DTO (no email ni fechaRegistro)
+            // Actualizar solo los campos que vienen en el DTO
             if (perfilDTO.getNombre() != null && !perfilDTO.getNombre().isEmpty()) {
                 usuario.setNombre(perfilDTO.getNombre());
             }
-            if (perfilDTO.getApellido() != null && !perfilDTO.getApellido().isEmpty()) {
-                usuario.setApellido(perfilDTO.getApellido());
+            if (perfilDTO.getTelefono() != null && !perfilDTO.getTelefono().isEmpty()) {
+                usuario.setTelefono(perfilDTO.getTelefono());
             }
-            if (perfilDTO.getFechaNacimiento() != null) {
-                usuario.setFechaNacimiento(perfilDTO.getFechaNacimiento());
+            if (perfilDTO.getDireccion() != null && !perfilDTO.getDireccion().isEmpty()) {
+                usuario.setDireccion(perfilDTO.getDireccion());
             }
-            if (perfilDTO.getEdad() != null) {
-                usuario.setEdad(perfilDTO.getEdad());
-            }
-            if (perfilDTO.getIsDuoc() != null) {
-                usuario.setIsDuoc(perfilDTO.getIsDuoc());
-            }
-            if (perfilDTO.getHasFelices50() != null) {
-                usuario.setHasFelices50(perfilDTO.getHasFelices50());
-            }
-            if (perfilDTO.getPreferencias() != null) {
-                usuario.setPreferencias(perfilDTO.getPreferencias());
-            }
+            // NOTA: No permitimos cambiar email por PUT /perfil, usar endpoint dedicado
 
             Usuario usuarioActualizado = usuarioRepository.save(usuario);
 
-            PerfilDTO perfilActualizado = new PerfilDTO();
-            perfilActualizado.setId(usuarioActualizado.getId());
-            perfilActualizado.setNombre(usuarioActualizado.getNombre());
-            perfilActualizado.setApellido(usuarioActualizado.getApellido());
-            perfilActualizado.setEmail(usuarioActualizado.getEmail());
-            perfilActualizado.setFechaNacimiento(usuarioActualizado.getFechaNacimiento());
-            perfilActualizado.setEdad(usuarioActualizado.getEdad());
-            perfilActualizado.setIsDuoc(usuarioActualizado.getIsDuoc());
-            perfilActualizado.setHasFelices50(usuarioActualizado.getHasFelices50());
-            perfilActualizado.setPreferencias(usuarioActualizado.getPreferencias());
-            perfilActualizado.setFechaRegistro(usuarioActualizado.getFechaRegistro());
+            PerfilDTO perfilActualizado = new PerfilDTO(
+                usuarioActualizado.getId(),
+                usuarioActualizado.getNombre(),
+                usuarioActualizado.getEmail(),
+                usuarioActualizado.getTelefono(),
+                usuarioActualizado.getDireccion(),
+                usuarioActualizado.getFechaCreacion()
+            );
 
             return ResponseEntity.ok(perfilActualizado);
         }

@@ -37,8 +37,4 @@ public class Categoria {
     
     @OneToMany(mappedBy = "categoriaPadre", cascade = CascadeType.ALL)
     private List<Categoria> subcategorias = new ArrayList<>();
-    
-    // Relación con productos
-    @OneToMany(mappedBy = "categoria")
-    private List<Producto> productos = new ArrayList<>();
 }

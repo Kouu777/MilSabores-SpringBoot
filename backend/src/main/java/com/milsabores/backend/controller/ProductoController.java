@@ -1,7 +1,9 @@
 package com.milsabores.backend.controller;
 
 import com.milsabores.backend.model.Producto;
+import com.milsabores.backend.model.Categoria;
 import com.milsabores.backend.repository.ProductoRespository;
+import com.milsabores.backend.repository.CategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,29 +17,17 @@ import java.util.Optional;
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class ProductoController {
     
-      @Autowired
+    @Autowired
     private ProductoRespository productoRepository;
+    
+    @Autowired
+    private CategoriaRepository categoriaRepository;
 
-    // GET: Obtener todos los productos
+    // GET: Todos los productos
     @GetMapping
     public List<Producto> getAllProductos() {
         return productoRepository.findAll();
     }
-
-    // GET: Obtener producto por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Producto> getProductoById(@PathVariable Long id) {
-        Optional<Producto> producto = productoRepository.findById(id);
-        return producto.map(ResponseEntity::ok)
-                      .orElse(ResponseEntity.notFound().build());
-    }
-
-    // GET: Obtener productos por categoría
-    @GetMapping("/categoria/{categoria}")
-    public List<Producto> getProductosByCategoria(@PathVariable String categoria) {
-        return productoRepository.findByCategoriaAndEsActivoTrue(categoria);
-    }
-
 
     // GET: Buscar productos por nombre
     @GetMapping("/buscar")
@@ -51,6 +41,39 @@ public class ProductoController {
             @RequestParam Double min, 
             @RequestParam Double max) {
         return productoRepository.findByPrecioBetween(min, max);
+    }
+
+    // GET: Obtener productos por categoría (por ID numérico)
+    // Ejemplo: GET /api/productos/categoria/1 
+    // Busca la categoría con ID=1, obtiene su nombre, y devuelve productos con ese nombre de categoría
+    @GetMapping("/categoria/{categoriaId}") 
+    public List<Producto> getProductosByCategoriaId(@PathVariable Long categoriaId) {
+        // Buscar la categoría por ID
+        Optional<Categoria> categoriaOpt = categoriaRepository.findById(categoriaId);
+        
+        if (categoriaOpt.isPresent()) {
+            // Obtener el nombre de la categoría
+            String nombreCategoria = categoriaOpt.get().getNombre();
+            // Buscar productos activos con ese nombre de categoría
+            return productoRepository.findByCategoriaAndEsActivoTrue(nombreCategoria);
+        }
+        
+        // Si no existe la categoría, devolver lista vacía
+        return List.of();
+    }
+
+    // GET: Obtener productos por categoría (nombre como string)
+    @GetMapping("/buscar/categoria")
+    public List<Producto> getProductosByCategoriaNombre(@RequestParam String categoria) {
+        return productoRepository.findByCategoriaAndEsActivoTrue(categoria);
+    }
+
+    // GET: Obtener producto por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Producto> getProductoById(@PathVariable Long id) {
+        Optional<Producto> producto = productoRepository.findById(id);
+        return producto.map(ResponseEntity::ok)
+                      .orElse(ResponseEntity.notFound().build());
     }
 
     // POST: Crear nuevo producto
