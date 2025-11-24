@@ -2,9 +2,12 @@ import { useMemo, useState, useEffect } from "react";
 import { productosPasteleria } from "../ProductosData";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner"; // 1. Importar el spinner
 
 const Productos = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  // 2. Añadir el estado de carga
+  const [isLoading, setIsLoading] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [user, setUser] = useState(null);
   const { addToCart, updateQuantity, cartItems } = useCart();
@@ -13,6 +16,9 @@ const Productos = () => {
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 300);
     window.addEventListener("scroll", handleScroll);
+
+    // Simulamos que los datos tardan 1.5 segundos en estar listos
+    setTimeout(() => setIsLoading(false), 1500);
 
     try {
       const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -49,6 +55,11 @@ const Productos = () => {
       addToCart(producto);
     }
   };
+
+  // 4. Mostrar el spinner si está cargando
+  if (isLoading) {
+    return <LoadingSpinner message="Cargando productos..." />;
+  }
 
   return (
     <div className="bg-cafe-blanco min-h-screen">

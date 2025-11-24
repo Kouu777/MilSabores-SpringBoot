@@ -14,7 +14,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Desactiva CSRF (importante si pruebas con Postman o Android)
             .csrf(csrf -> csrf.disable())
             // Autoriza todas las solicitudes
             .authorizeHttpRequests(auth -> auth
@@ -23,9 +22,8 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().permitAll()
             )
-            // No uses sesión
+            // sin sesión
             .sessionManagement(session -> session.disable())
-            // Desactiva login básico
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(form -> form.disable());
 

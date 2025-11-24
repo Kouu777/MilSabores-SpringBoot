@@ -1,6 +1,5 @@
 package com.milsabores.backend.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,17 +34,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String servletPath = request.getServletPath();
         String method = request.getMethod();
 
-        logger.info("🔍 JwtRequestFilter - Path: {} | Method: {}", servletPath, method);
+        logger.info("Path: {} | Method: {}", servletPath, method);
 
-        // 🚫 Saltar validación JWT si es endpoint público
         if (isPublicEndpoint(servletPath, method)) {
-            logger.info("✅ ENDPOINT PÚBLICO - Saltando validación JWT para: {} {}", method, servletPath);
+            logger.info("Endpoint público: {} {}", method, servletPath);
             chain.doFilter(request, response);
             return;
         }
 
-        // 🔒 Endpoints protegidos: validar JWT
-        logger.info("🔐 ENDPOINT PROTEGIDO - Validando JWT para: {} {}", method, servletPath);
+        logger.info("Endpoint protegido: {} {}", method, servletPath);
 
         final String authorizationHeader = request.getHeader("Authorization");
         String username = null;
@@ -56,7 +53,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                logger.error("❌ Error extrayendo usuario del token: {}", e.getMessage());
+                logger.error("Error al extraer usuario del token: {}", e.getMessage());
             }
         }
 
@@ -68,34 +65,29 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                logger.info("✅ JWT válido para usuario {}", username);
+                logger.info("JWT válido para {}", username);
             } else {
-                logger.warn("⚠️ JWT inválido o expirado");
+                logger.warn("JWT inválido o expirado");
             }
         }
 
         chain.doFilter(request, response);
     }
 
-    /**
-     * ✅ Determina si el endpoint es público (no requiere JWT)
-     */
     private boolean isPublicEndpoint(String path, String method) {
         if (path == null || method == null) return false;
 
-        // --- ENDPOINTS DE AUTENTICACIÓN Y CONSOLA H2 ---
         if (path.startsWith("/api/auth") || path.startsWith("/h2-console")) return true;
 
-        // --- DOCUMENTACIÓN Y RECURSOS PÚBLICOS ---
-        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/uploads")) return true;
+        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/uploads"))
+            return true;
 
-        // --- PRODUCTOS / CATEGORÍAS / REVIEWS (GET y POST) ---
+        if (path.startsWith("/api/qr")) return true;
+
         if (path.startsWith("/api/productos") || path.startsWith("/api/categorias") || path.startsWith("/api/reviews")) {
-            // Permitir todos los métodos comunes (GET, POST)
             if (method.equals("GET") || method.equals("POST")) return true;
         }
 
-        // --- PERMITIR CUALQUIER POST QUE CONTENGA /reviews (como /api/productos/1/reviews) ---
         if (method.equals("POST") && path.contains("/reviews")) return true;
 
         return false;
