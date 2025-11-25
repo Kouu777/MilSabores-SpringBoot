@@ -1,29 +1,33 @@
 package com.milsabores.backend.controller;
 
 import com.milsabores.backend.services.QrService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.zxing.WriterException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/qr")
+@CrossOrigin(origins = "*")
 public class QrController {
 
     @Autowired
     private QrService qrService;
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<byte[]> getProductQr(@PathVariable String productId) {
-        try {
-            byte[] qrBytes = qrService.generateQRCode(productId, 300, 300);
+    // Genera un QR que contiene SOLO el texto recibido
+    @GetMapping("/generate/{codigo}")
+    public ResponseEntity<byte[]> generateQr(@PathVariable String codigo)
+            throws IOException, WriterException {
 
-            return ResponseEntity
-                    .ok()
-                    .header("Content-Type", "image/png")
-                    .body(qrBytes);
+        // El QR contendrá exactamente "codigo", sin URL ni nada extra
+        byte[] qrImage = qrService.generateQRCode(codigo, 300, 300);
 
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, "image/png")
+                .body(qrImage);
     }
 }
