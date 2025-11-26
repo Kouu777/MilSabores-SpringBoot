@@ -1,5 +1,7 @@
 package com.milsabores.backend.controller;
 
+import com.milsabores.backend.model.Producto;
+import com.milsabores.backend.repository.ProductoRespository;
 import com.milsabores.backend.services.QrService;
 import com.google.zxing.WriterException;
 import org.springframework.http.HttpHeaders;
@@ -17,13 +19,40 @@ public class QrController {
     @Autowired
     private QrService qrService;
 
-    // Genera un QR que contiene SOLO el texto recibido
-    @GetMapping("/generate/{codigo}")
-    public ResponseEntity<byte[]> generateQr(@PathVariable String codigo)
+    @Autowired
+    private ProductoRespository productoRepository;
+
+    @GetMapping("/generate/{productoId}")
+    public ResponseEntity<?> generateQr(@PathVariable Long productoId)
             throws IOException, WriterException {
 
-        // El QR contendrá exactamente "codigo", sin URL ni nada extra
-        byte[] qrImage = qrService.generateQRCode(codigo, 300, 300);
+        System.out.println("🔍 Generando QR para producto ID = " + productoId);
+
+        // Buscar producto
+        Producto producto = productoRepository.findById(productoId).orElse(null);
+
+        if (producto == null) {
+            System.out.println("❌ Producto no encontrado");
+            return ResponseEntity
+                    .status(404)
+                    .body("Producto no encontrado");
+        }
+
+        if (producto.getCategoria() == null || producto.getCategoria().isEmpty()) {
+            System.out.println("❌ El producto existe pero categoría es NULL o vacía");
+            return ResponseEntity
+                    .status(500)
+                    .body("El producto no tiene categoría asignada");
+        }
+
+        String categoria = producto.getCategoria(); // String (TU DB así lo tiene)
+
+        // CONTENIDO EXACTO PARA LA APP
+        String qrContent = categoria + ";" + productoId;
+
+        System.out.println("📦 Contenido QR generado: " + qrContent);
+
+        byte[] qrImage = qrService.generateQRCode(qrContent, 300, 300);
 
         return ResponseEntity
                 .ok()

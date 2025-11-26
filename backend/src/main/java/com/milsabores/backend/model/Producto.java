@@ -21,7 +21,6 @@ public class Producto {
     @Column(name = "descripcion")
     private String descripcion;
     
-    // ⚠️ SOLO esto - SIN precision y scale
     @Column(name = "precio", nullable = false)
     private Double precio;
     
