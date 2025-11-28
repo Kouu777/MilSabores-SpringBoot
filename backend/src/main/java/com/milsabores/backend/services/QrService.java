@@ -13,20 +13,15 @@ import java.io.IOException;
 @Service
 public class QrService {
 
-    public byte[] generateQRCode(String text, int width, int height) throws WriterException, IOException {
+    public byte[] generateQRCode(String text, int width, int height)
+            throws WriterException, IOException {
 
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        QRCodeWriter writer = new QRCodeWriter();
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height);
 
-        BitMatrix bitMatrix = qrCodeWriter.encode(
-                text,
-                BarcodeFormat.QR_CODE,
-                width,
-                height
-        );
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
 
-        ByteArrayOutputStream png = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", png);
-
-        return png.toByteArray();
+        return pngOutputStream.toByteArray();
     }
 }
