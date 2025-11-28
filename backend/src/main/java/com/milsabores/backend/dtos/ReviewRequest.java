@@ -17,7 +17,5 @@ public class ReviewRequest {
     private Integer rating;
     private String comment;
     private Float sentimentScore;
-    private List<String> imageUrls;
-      private String usuario;
-    private String texto;
+    private String imageBase64;
 }

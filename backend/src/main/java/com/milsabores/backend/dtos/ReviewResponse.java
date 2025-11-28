@@ -17,4 +17,5 @@ public class ReviewResponse {
     private Integer rating;
     private String imageUrl;
     private LocalDateTime fecha;
+    
 }
